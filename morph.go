@@ -10,8 +10,10 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
+type status int
+
 const (
-	notRan = iota
+	notRan status = iota
 	ran
 )
 
@@ -55,7 +57,7 @@ func (m *Morph) up(db *pg.DB, tp *map[string]interface{}) {
 	err := migr.Up(db)
 	panicIf(err)
 
-	m.Status = ran
+	m.Status = int(ran)
 	db.Model(m).
 		Column("status").
 		WherePK().
@@ -125,12 +127,12 @@ func migrate(db *pg.DB, tp *map[string]interface{}, sp int) {
 	var err error
 	if sp == 0 {
 		err = db.Model(ms).
-			Where("status = ?", notRan).
+			Where("status = ?", int(notRan)).
 			Order("file_name ASC").
 			Select()
 	} else {
 		err = db.Model(ms).
-			Where("status = ?", notRan).
+			Where("status = ?", int(notRan)).
 			Order("file_name ASC").
 			Limit(sp).
 			Select()
@@ -151,12 +153,12 @@ func rollback(db *pg.DB, tp *map[string]interface{}, sp int) {
 	var err error
 	if sp == 0 {
 		err = db.Model(ms).
-			Where("status = ?", ran).
+			Where("status = ?", int(ran)).
 			Order("file_name DESC").
 			Select()
 	} else {
 		err = db.Model(ms).
-			Where("status = ?", ran).
+			Where("status = ?", int(ran)).
 			Order("file_name DESC").
 			Limit(sp).
 			Select()
