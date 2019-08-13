@@ -3,7 +3,6 @@ package morph
 import (
 	"io/ioutil"
 	"log"
-	"reflect"
 	"regexp"
 	"time"
 
@@ -40,18 +39,16 @@ func (m *Morph) className() string {
 	return st
 }
 
-func (m *Morph) makeInstance(tp *map[string]reflect.Type) interface{} {
+func (m *Morph) getObject(tp *map[string]interface{}) interface{} {
 	n := m.className()
 
-	log.Printf("Creating new instance of %s\n", n)
+	log.Printf("Retrieving %s object\n", n)
 
-	v := reflect.New(typeRegistry[n]).Elem()
-
-	return v.Interface()
+	return (*tp)[n]
 }
 
-func (m *Morph) up(db *pg.DB, tp *map[string]reflect.Type) {
-	mig := m.makeInstance(tp)
+func (m *Morph) up(db *pg.DB, tp *map[string]interface{}) {
+	mig := m.getObject(tp)
 	migr := mig.(Stepable)
 
 	log.Printf("Migrating %s\n", m.FileName)
@@ -65,8 +62,8 @@ func (m *Morph) up(db *pg.DB, tp *map[string]reflect.Type) {
 		Update()
 }
 
-func (m *Morph) down(db *pg.DB, tp *map[string]reflect.Type) {
-	mig := m.makeInstance(tp)
+func (m *Morph) down(db *pg.DB, tp *map[string]interface{}) {
+	mig := m.getObject(tp)
 	migr := mig.(Stepable)
 
 	log.Printf("Rolling back %s\n", m.FileName)
@@ -120,7 +117,7 @@ func prepare(db *pg.DB, dr string) {
 	updateMorph(db, fn)
 }
 
-func migrate(db *pg.DB, tp *map[string]reflect.Type, sp int) {
+func migrate(db *pg.DB, tp *map[string]interface{}, sp int) {
 	log.Println("Migrating ...")
 
 	ms := &[]Morph{}
@@ -146,7 +143,7 @@ func migrate(db *pg.DB, tp *map[string]reflect.Type, sp int) {
 	}
 }
 
-func rollback(db *pg.DB, tp *map[string]reflect.Type, sp int) {
+func rollback(db *pg.DB, tp *map[string]interface{}, sp int) {
 	log.Println("Rolling back ...")
 
 	ms := &[]Morph{}

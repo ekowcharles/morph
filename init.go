@@ -1,17 +1,15 @@
 package morph
 
 import (
-	"reflect"
-
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
 )
 
-var typeRegistry map[string]reflect.Type
+var typeRegistry map[string]interface{}
 
 type Morpher struct {
 	DB           *pg.DB
-	typeRegistry *map[string]reflect.Type
+	typeRegistry *map[string]interface{}
 	Folder       string
 }
 
