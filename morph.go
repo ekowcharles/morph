@@ -10,12 +10,8 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-type status int
-
-const (
-	notRan status = iota
-	ran
-)
+const notRan = 0
+const ran = 0
 
 type Morph struct {
 	ID       uuid.NullUUID `sql:",pk,type:uuid default uuid_generate_v4()"`
@@ -57,7 +53,7 @@ func (m *Morph) up(db *pg.DB, tp *map[string]interface{}) {
 	err := migr.Up(db)
 	panicIf(err)
 
-	m.Status = int(ran)
+	m.Status = ran
 	db.Model(m).
 		Column("status").
 		WherePK().
@@ -72,7 +68,7 @@ func (m *Morph) down(db *pg.DB, tp *map[string]interface{}) {
 	err := migr.Down(db)
 	panicIf(err)
 
-	m.Status = int(notRan)
+	m.Status = notRan
 	db.Model(m).
 		Column("status").
 		WherePK().
@@ -83,7 +79,7 @@ func updateMorph(db *pg.DB, fn []string) {
 	for _, f := range fn {
 		log.Printf("Adding %s to migrations\n", f)
 
-		m := &Morph{FileName: f, Status: int(notRan)}
+		m := &Morph{FileName: f, Status: notRan}
 
 		c, err := db.Model((*Morph)(nil)).
 			Where("file_name = ?", m.FileName).
@@ -127,12 +123,12 @@ func migrate(db *pg.DB, tp *map[string]interface{}, sp int) {
 	var err error
 	if sp == 0 {
 		err = db.Model(ms).
-			Where("status = ?", int(notRan)).
+			Where("status = ?", notRan).
 			Order("file_name ASC").
 			Select()
 	} else {
 		err = db.Model(ms).
-			Where("status = ?", int(notRan)).
+			Where("status = ?", notRan).
 			Order("file_name ASC").
 			Limit(sp).
 			Select()
@@ -153,12 +149,12 @@ func rollback(db *pg.DB, tp *map[string]interface{}, sp int) {
 	var err error
 	if sp == 0 {
 		err = db.Model(ms).
-			Where("status = ?", int(ran)).
+			Where("status = ?", ran).
 			Order("file_name DESC").
 			Select()
 	} else {
 		err = db.Model(ms).
-			Where("status = ?", int(ran)).
+			Where("status = ?", ran).
 			Order("file_name DESC").
 			Limit(sp).
 			Select()
