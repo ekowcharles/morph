@@ -15,13 +15,16 @@ type Morpher struct {
 	Folder       string
 }
 
-func (m *Morpher) Init(db *pg.DB, tp []interface{}) {
+func Init(db *pg.DB, tp []interface{}) *Morpher {
+	m := &Morpher{}
 	m.DB = db
 	m.Folder = getEnv("MIGRATION_FOLDER", "./morph")
 
 	typeRegistry = createTypeRegistry(tp)
 
 	m.createSchema()
+
+	return m
 }
 
 func (m *Morpher) Migrate() {

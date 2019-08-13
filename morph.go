@@ -86,7 +86,9 @@ func updateMorph(db *pg.DB, fn []string) {
 
 		m := &Morph{FileName: f, Status: notRan}
 
-		c, err := db.Model(m).Where("file_name = ?", m.FileName).Count()
+		c, err := db.Model((*Morph)(nil)).
+			Where("file_name = ?", m.FileName).
+			Count()
 		panicIf(err)
 
 		if c != 0 {
