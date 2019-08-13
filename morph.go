@@ -10,8 +10,8 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-const notRan = 0
-const ran = 0
+const notRan = 1
+const ran = 2
 
 type Morph struct {
 	ID       uuid.NullUUID `sql:",pk,type:uuid default uuid_generate_v4()"`
