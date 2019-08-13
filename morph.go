@@ -26,7 +26,7 @@ func (m *Morph) className() string {
 	// File names expected in the format 0012_MorphIntoSomethingMagical
 	log.Printf("Extracting name of struct from %s\n", m.FileName)
 
-	re, err := regexp.Compile("^[0-9]+\\_(.*?)$")
+	re, err := regexp.Compile("^[0-9]+\\_(.*?)(\\.go)$")
 	panicIf(err)
 
 	match := re.FindStringSubmatch(m.FileName)
@@ -77,8 +77,6 @@ func (m *Morph) down(db *pg.DB, tp *map[string]interface{}) {
 
 func updateMorph(db *pg.DB, fn []string) {
 	for _, f := range fn {
-		log.Printf("Adding %s to migrations\n", f)
-
 		m := &Morph{FileName: f, Status: notRan}
 
 		c, err := db.Model((*Morph)(nil)).
@@ -89,6 +87,8 @@ func updateMorph(db *pg.DB, fn []string) {
 		if c != 0 {
 			continue
 		}
+
+		log.Printf("Adding %s to migrations\n", f)
 
 		err = db.Insert(m)
 		panicIf(err)
