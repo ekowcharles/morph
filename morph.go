@@ -70,7 +70,7 @@ func (m *Morph) down(db *pg.DB, tp *map[string]interface{}) {
 	err := migr.Down(db)
 	panicIf(err)
 
-	m.Status = notRan
+	m.Status = int(notRan)
 	db.Model(m).
 		Column("status").
 		WherePK().
@@ -81,7 +81,7 @@ func updateMorph(db *pg.DB, fn []string) {
 	for _, f := range fn {
 		log.Printf("Adding %s to migrations\n", f)
 
-		m := &Morph{FileName: f, Status: notRan}
+		m := &Morph{FileName: f, Status: int(notRan)}
 
 		c, err := db.Model((*Morph)(nil)).
 			Where("file_name = ?", m.FileName).
