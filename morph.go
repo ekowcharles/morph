@@ -42,7 +42,12 @@ func (m *Morph) getObject(tp *map[string]interface{}) interface{} {
 
 	log.Printf("Retrieving %s object\n", n)
 
-	return (*tp)[n]
+	obj := (*tp)[n]
+	if obj == nil {
+		log.Fatalf("Struct and file name mismatch. Found %s.\n", n)
+	}
+
+	return obj
 }
 
 func (m *Morph) up(db *pg.DB, tp *map[string]interface{}) {

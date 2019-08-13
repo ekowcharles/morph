@@ -5,21 +5,21 @@ import (
 	"github.com/go-pg/pg/v9/orm"
 )
 
-var typeRegistry map[string]interface{}
+var typeRegistry *map[string]interface{}
 
 type Morpher struct {
-	DB           *pg.DB
 	typeRegistry *map[string]interface{}
-	Folder       string
+
+	db     *pg.DB
+	Folder string
 }
 
 func Init(db *pg.DB, tp []interface{}) *Morpher {
 	m := &Morpher{}
-	m.DB = db
+	m.db = db
 	m.Folder = getEnv("MIGRATION_FOLDER", "./morph")
 
-	typeRegistry = createTypeRegistry(tp)
-
+	m.typeRegistry = createTypeRegistry(tp)
 	m.createSchema()
 
 	return m
@@ -30,9 +30,9 @@ func (m *Morpher) Migrate() {
 }
 
 func (m *Morpher) MigrateWithStep(sp int) {
-	prepare(m.DB, m.Folder)
+	prepare(m.db, m.Folder)
 
-	migrate(m.DB, m.typeRegistry, sp)
+	migrate(m.db, m.typeRegistry, sp)
 }
 
 func (m *Morpher) Rollback() {
@@ -40,19 +40,19 @@ func (m *Morpher) Rollback() {
 }
 
 func (m *Morpher) RollbackWithStep(sp int) {
-	prepare(m.DB, m.Folder)
+	prepare(m.db, m.Folder)
 
-	rollback(m.DB, m.typeRegistry, sp)
+	rollback(m.db, m.typeRegistry, sp)
 }
 
 func (m *Morpher) createSchema() {
-	_, err := m.DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
+	_, err := m.db.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
 	panicIf(err)
 
 	for _, model := range []interface{}{
 		(*Morph)(nil),
 	} {
-		m.DB.CreateTable((model), &orm.CreateTableOptions{
+		m.db.CreateTable((model), &orm.CreateTableOptions{
 			IfNotExists: true,
 		})
 	}
@@ -67,7 +67,7 @@ func (m *Morpher) createSchema() {
 	}
 
 	for _, q := range qs {
-		_, err := m.DB.Exec(q)
+		_, err := m.db.Exec(q)
 
 		panicIf(err)
 	}

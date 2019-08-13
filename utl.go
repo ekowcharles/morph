@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 )
 
 const zeroString = ""
@@ -22,17 +23,19 @@ func getEnv(key, fallback string) string {
 	return value
 }
 
-func createTypeRegistry(ifc []interface{}) map[string]interface{} {
+func createTypeRegistry(ifc []interface{}) *map[string]interface{} {
 	log.Println("Creating type registry")
 
 	typeRegistry := make(map[string]interface{})
 
 	for _, v := range ifc {
-		r := fmt.Sprintf("%T", v)
+		rs := strings.Split(fmt.Sprintf("%T", v), ".")
+		r := rs[len(rs)-1]
+
 		log.Printf("Creating registry entry for %s\n", r)
 
 		typeRegistry[r] = v
 	}
 
-	return typeRegistry
+	return &typeRegistry
 }
