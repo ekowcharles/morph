@@ -23,7 +23,7 @@ type Morph struct {
 }
 
 func (m *Morph) className() string {
-	// File names expected in the format 0012_MorphIntoSomethingMagical
+	// File names expected in the format 0012_MorphIntoSomethingMagical.go
 	log.Printf("Extracting name of struct from %s\n", m.FileName)
 
 	re, err := regexp.Compile("^[0-9]+\\_(.*?)(\\.go)$")
